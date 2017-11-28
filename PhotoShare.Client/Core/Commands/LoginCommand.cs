@@ -27,12 +27,15 @@ namespace PhotoShare.Client.Core.Commands
                 {
                     throw new ArgumentException("Invalid username or password!");
                 }
-                var session = user.Sessions
+                //var session = user.Sessions
+                //    .Where(s => s.LoggedIn != null && s.LoggedOut == null)
+                //    .ToArray();
+                var session = context.Sessions
                     .Where(s => s.LoggedIn != null && s.LoggedOut == null)
                     .ToArray();
                 if (session.Length > 0)
                 {
-                    throw new ArgumentException("You should logout first!");
+                    throw new InvalidOperationException("Invalid credentials!");
                 }
                 context.Sessions.Add(new Session()
                 {

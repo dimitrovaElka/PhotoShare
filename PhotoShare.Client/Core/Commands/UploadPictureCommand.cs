@@ -1,5 +1,6 @@
 ﻿namespace PhotoShare.Client.Core.Commands
 {
+    using Microsoft.EntityFrameworkCore;
     using PhotoShare.Data;
     using PhotoShare.Models;
     using System;
@@ -19,8 +20,19 @@
             string pictureFilePath = data[3];
             using (var context = new PhotoShareContext())
             {
+                var loggedUser = IsLogged.IsLoggedIn(context);
+  
                 var album = context.Albums
+                    .Include(u => u.AlbumRoles)
+                    .ThenInclude(x => x.User)
                     .FirstOrDefault(a => a.Name == albumName);
+
+                var albumOwner = album.AlbumRoles
+                    .FirstOrDefault(x => x.Role == Role.Owner).User;
+                if (loggedUser != albumOwner)
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
                 if (album == null)
                 {
                     throw new ArgumentException($"Album {albumName} not found!");

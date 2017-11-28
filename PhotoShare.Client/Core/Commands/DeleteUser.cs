@@ -13,7 +13,12 @@
             string username = data[1];
             using (PhotoShareContext context = new PhotoShareContext())
             {
+                var loggedUser = IsLogged.IsLoggedIn(context);
                 var user = context.Users.FirstOrDefault(u => u.Username == username);
+                if (loggedUser != user)
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
                 if (user == null)
                 {
                     throw new InvalidOperationException($"User with {username} was not found!");
@@ -25,6 +30,8 @@
                     throw new InvalidOperationException($"User {username} is already deleted!");
                 }
                 user.IsDeleted = true;
+                //var userSession = user.Sessions.FirstOrDefault(s => s.LoggedOut == null);
+                //userSession.LoggedOut = DateTime.Now;
                 context.SaveChanges();
 
                 return $"User {username} was deleted from the database!";

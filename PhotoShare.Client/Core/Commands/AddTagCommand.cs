@@ -21,6 +21,8 @@
 
             using (PhotoShareContext context = new PhotoShareContext())
             {
+                IsLogged.IsLoggedIn(context);
+
                 if (context.Tags.Any(t => t.Name == tag))
                 {
                     throw new ArgumentException($"Tag {tag} exists!");

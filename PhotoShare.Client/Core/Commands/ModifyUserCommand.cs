@@ -1,5 +1,6 @@
 ﻿namespace PhotoShare.Client.Core.Commands
 {
+    using PhotoShare.Models;
     using System;
     using System.Linq;
 
@@ -21,9 +22,15 @@
             var errorTown = $"Town {newValue} not found!";
             using (var context = new Data.PhotoShareContext())
             {
-                var user = context.Users
+                User loggedUser = IsLogged.IsLoggedIn(context);
+
+                User user = context.Users
                     .Where(u => u.Username == username)
                     .FirstOrDefault();
+                if (loggedUser != user)
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
                 if (user == null)
                 {
                     throw new ArgumentException($"User {username} not found!");

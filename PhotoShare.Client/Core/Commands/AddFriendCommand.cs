@@ -16,10 +16,17 @@
 
             using (var context = new PhotoShareContext())
             {
+                var loggedUser = IsLogged.IsLoggedIn(context);
+
                 var reqUser = context.Users
                     .Include(u => u.FriendsAdded)
                     .ThenInclude(fa => fa.Friend)
                     .FirstOrDefault(u => u.Username == reqUsername);
+                if (loggedUser != reqUser)
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
+
                 if (reqUser == null)
                 {
                     throw new ArgumentException($"{reqUsername} not found!");
@@ -41,7 +48,7 @@
                 }
                 if (alreadyAdded && !accepted)
                 {
-                    throw new InvalidOperationException($"{reqUser} is already sent invite to {addedFriend}");
+                    throw new InvalidOperationException($"{reqUsername} is already sent invite to {addedFriendUsername}");
                 }
                 if (!alreadyAdded && accepted)
                 {

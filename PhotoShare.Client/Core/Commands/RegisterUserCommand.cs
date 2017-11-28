@@ -22,13 +22,17 @@
 
             using (PhotoShareContext context = new PhotoShareContext())
             {
+                var existingSession = context.Sessions.Any(s => s.LoggedOut == null);
+                if (existingSession)
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
                 var existingUser = context.Users
-                    .AsNoTracking()
                     .Where(u => u.Username == username)
                     .FirstOrDefault();
-                if (existingUser != null)
+                if (existingUser != null && existingUser.IsDeleted == false)
                 {
-                    throw new InvalidOperationException($"Username {username} is already taken!");
+                    throw new InvalidOperationException($"User {username} is already taken!");
                 }
                 if (password.Length < 6 || password.Length > 50 ||
                             !password.Any(c => Char.IsDigit(c)) || 
@@ -40,17 +44,26 @@
                 {
                     throw new ArgumentException("Passwords do not match!");
                 }
-
-                User user = new User
+                if (existingUser != null && existingUser.IsDeleted == true)
                 {
-                    Username = username,
-                    Password = password,
-                    Email = email,
-                    IsDeleted = false,
-                    RegisteredOn = DateTime.Now,
-                    LastTimeLoggedIn = DateTime.Now
-                };
-                context.Users.Add(user);
+                    existingUser.IsDeleted = false;
+                    existingUser.Password = password;
+                    existingUser.Email = email;
+                    context.Users.Update(existingUser);
+                }
+                else
+                {
+                    User user = new User
+                    {
+                        Username = username,
+                        Password = password,
+                        Email = email,
+                        IsDeleted = false,
+                        RegisteredOn = DateTime.Now,
+                        LastTimeLoggedIn = DateTime.Now
+                    };
+                    context.Users.Add(user);
+                }
                 context.SaveChanges();
             }
 

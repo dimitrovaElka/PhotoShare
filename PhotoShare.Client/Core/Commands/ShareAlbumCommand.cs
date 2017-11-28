@@ -30,9 +30,14 @@
             }
             using (var context = new PhotoShareContext())
             {
+                var loggedUser = IsLogged.IsLoggedIn(context);
                 var user = context.Users
                     .Include(u => u.AlbumRoles)
                     .FirstOrDefault(u => u.Username == username);
+                if (loggedUser != user.AlbumRoles.Where(x => x.Role == Role.Owner))
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
                 if (user == null)
                 {
                     throw new ArgumentException($"User {username} not found!");

@@ -40,6 +40,9 @@
                 case "addfriend":
                     result = AddFriendCommand.Execute(commandParameters);
                     break;
+                case "makefriends":
+                    result = AddFriendCommand.Execute(commandParameters);
+                    break;
                 case "acceptfriend":
                     result = AcceptFriendCommand.Execute(commandParameters);
                     break;

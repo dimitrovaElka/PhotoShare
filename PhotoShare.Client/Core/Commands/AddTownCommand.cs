@@ -20,12 +20,7 @@
 
             using (PhotoShareContext context = new PhotoShareContext())
             {
-                var validSession = context.Sessions
-                    .FirstOrDefault(s => s.LoggedOut != null);
-                if (validSession == null)
-                {
-                    throw new InvalidOperationException("Invalid credentials!");
-                }
+                IsLogged.IsLoggedIn(context);
 
                 if (context.Towns.Any(t => t.Name == townName))
                 {
@@ -43,5 +38,7 @@
                 return "Town " + townName + " was added succesfully!";
             }
         }
+
+
     }
 }

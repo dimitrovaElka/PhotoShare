@@ -22,8 +22,13 @@
             var result = "";
             using (var context = new PhotoShareContext())
             {
+                var loggedUser = IsLogged.IsLoggedIn(context);
                 var existingUser = context.Users
                     .FirstOrDefault(u => u.Username == username);
+                if (loggedUser != existingUser)
+                {
+                    throw new InvalidOperationException("Invalid credentials!");
+                }
                 if (existingUser == null)
                 {
                     throw new ArgumentException($"User {username} not found!");
